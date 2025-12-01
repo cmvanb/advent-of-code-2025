@@ -1,6 +1,6 @@
 use std::io::{self, BufRead};
 
-const DIAL_MAX: i32 = 99;
+const DIAL_WRAP: i32 = 100;
 const DIAL_ORIGIN: i32 = 50;
 
 #[derive(Debug, Clone, Copy)]
@@ -11,17 +11,17 @@ struct Dial {
 impl Dial {
     pub fn rotate(&mut self, ticks: i32) -> i32 {
         let zeroes = if ticks >= 0 {
-            (self.current_tick + ticks) / (DIAL_MAX + 1)
+            (self.current_tick + ticks) / DIAL_WRAP
+
+        } else if -ticks >= self.current_tick {
+            // initial crossing + additional rotations
+            (self.current_tick != 0) as i32 + (-ticks - self.current_tick) / DIAL_WRAP
+
         } else {
-            let base_zeroes = ((-ticks >= self.current_tick) as i32) * (1 + (-ticks - self.current_tick) / (DIAL_MAX + 1));
-            if self.current_tick == 0 {
-                base_zeroes - 1
-            } else {
-                base_zeroes
-            }
+            0
         };
 
-        self.current_tick = (self.current_tick + ticks).rem_euclid(DIAL_MAX + 1);
+        self.current_tick = (self.current_tick + ticks).rem_euclid(DIAL_WRAP);
         zeroes
     }
 }
