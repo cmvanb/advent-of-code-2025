@@ -64,15 +64,48 @@ fn is_valid_id_part1(id: &u64) -> bool {
     true
 }
 
+fn is_valid_id_part2(id: &u64) -> bool {
+    let s = id.to_string();
+    let len = s.len();
+
+    for pattern_len in 1..=len / 2 {
+        if len % pattern_len == 0 {
+            let pattern = &s[..pattern_len];
+            let repetitions = len / pattern_len;
+
+            if pattern.repeat(repetitions) == s {
+                return false;
+            }
+        }
+    }
+
+    true
+}
+
 fn main() {
     let ranges = parse_input().expect("Failed to parse input");
-    let invalid_ids = ranges
+
+    let invalid_ids_part1: Vec<u64> = ranges.clone()
         .into_iter()
         .flatten()
         .filter(|id| !is_valid_id_part1(id))
-        .collect::<Vec<u64>>();
+        .collect();
+    println!("Invalid IDs for Part 1: {:?}", invalid_ids_part1);
 
-    let part_1_solution: u64 = invalid_ids.iter().sum();
+    let solution_part1: u64 = invalid_ids_part1
+        .iter()
+        .sum();
+    println!("Part 1 Solution: {}", solution_part1);
 
-    println!("Part 1 Solution: {}", part_1_solution);
+    let invalid_ids_part2: Vec<u64> = ranges.clone()
+        .into_iter()
+        .flatten()
+        .filter(|id| !is_valid_id_part2(id))
+        .collect();
+    println!("Invalid IDs for Part 2: {:?}", invalid_ids_part2);
+
+    let solution_part2: u64 = invalid_ids_part2
+        .iter()
+        .sum();
+    println!("Part 2 Solution: {}", solution_part2);
 }
