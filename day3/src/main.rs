@@ -57,6 +57,7 @@ fn get_highest_n_digits(bank: &[u8], n: usize) -> String {
 
         let mut max_pos = start;
         let mut max_val = bank[start];
+        #[allow(clippy::needless_range_loop)]
         for i in start + 1..end {
             if bank[i] > max_val {
                 max_val = bank[i];
