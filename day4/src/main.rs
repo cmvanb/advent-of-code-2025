@@ -82,46 +82,52 @@ impl Warehouse {
             .filter(|&has_paper| has_paper)
             .count()
     }
+
+    fn get_reachable_positions(&self) -> Vec<(usize, usize)> {
+        let mut reachable_positions = Vec::new();
+        for (y, row) in self.grid.iter().enumerate() {
+            for (x, _) in row.iter().enumerate() {
+                if self.has_paper_at(x, y) && self.count_adjacent_paper(x, y) < 4 {
+                    reachable_positions.push((x, y));
+                }
+            }
+        }
+        reachable_positions
+    }
 }
 
 fn main() {
     let input = read_stdin();
     let mut warehouse = Warehouse::from_input(input).expect("Failed to parse input");
 
-    let mut positions_to_mark = Vec::new();
-    for (y, row) in warehouse.grid.iter().enumerate() {
-        for (x, _) in row.iter().enumerate() {
-            if warehouse.has_paper_at(x, y) && warehouse.count_adjacent_paper(x, y) < 4 {
-                positions_to_mark.push((x, y));
-            }
+    let reachable_count = warehouse.get_reachable_positions().len();
+    println!("Initially reachable: {}", reachable_count);
+
+    let mut total_removable = 0;
+    loop {
+        let reachable_positions = warehouse.get_reachable_positions();
+        if reachable_positions.is_empty() {
+            break;
         }
-    }
 
-    for (x, y) in positions_to_mark {
-        warehouse.grid[y][x].reachable = true;
-    }
+        for (x, y) in &reachable_positions {
+            warehouse.grid[*y][*x].reachable = true;
+            warehouse.grid[*y][*x].has_paper = false;
+        }
 
+        total_removable += reachable_positions.len();
+    }
+    println!("Total removable: {}", total_removable);
+
+    println!("Final grid state:");
     for row in &warehouse.grid {
         for cell in row {
-            if !cell.has_paper {
-                print!(".");
-            } else if cell.reachable {
-                print!("X");
-            } else {
+            if cell.has_paper {
                 print!("@");
+            } else {
+                print!(".");
             }
         }
         println!();
     }
-
-    let reachable_count: usize = warehouse
-        .grid
-        .iter()
-        .flat_map(|row| row.iter())
-        .filter(|cell| cell.reachable)
-        .count();
-    println!("{}", reachable_count);
-
-
-
 }
